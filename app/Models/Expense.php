@@ -11,7 +11,6 @@ class Expense extends Model
     
     protected $fillable = [
         'description',
-        'amount',
         'expense_date',
         'user_id',
     ];
@@ -23,5 +22,15 @@ class Expense extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+    
+    public function items()
+    {
+        return $this->hasMany(ExpenseItem::class);
+    }
+    
+    public function getTotalAmountAttribute()
+    {
+        return $this->items->sum('price');
     }
 }

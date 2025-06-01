@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use App\Models\Order;
 use App\Models\Expense;
 use App\Models\Product;
+use App\Models\ExpenseItem;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -19,8 +20,10 @@ class DashboardController extends Controller
         $todaySales = Order::whereBetween('created_at', [$todayStart, $todayEnd])
             ->sum('final_amount');
             
-        $todayExpenses = Expense::whereBetween('expense_date', [$todayStart, $todayEnd])
-            ->sum('amount');
+        // Calculate today's expenses by summing up the prices of all expense items for expenses from today
+        $todayExpenses = ExpenseItem::whereHas('expense', function($query) use ($todayStart, $todayEnd) {
+            $query->whereBetween('expense_date', [$todayStart, $todayEnd]);
+        })->sum('price');
             
         $todayProfit = $todaySales - $todayExpenses;
         
